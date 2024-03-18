@@ -9,16 +9,25 @@ import Account from "./routes/Account";
 import axios from "axios";
 
 function App() {
-  const [coin, setCoin] = useState([]);
+  const [coins, setCoins] = useState([]);
 
+  const url =
+    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true";
   useEffect(() => {
-    const request = async () => {};
-  }, []);
+    const request = () => {
+      axios.get(url).then((response) => {
+        console.log(response.data);
+        setCoins(response.data);
+      });
+    };
+    request();
+  }, [url]);
+
   return (
     <ThemeProvider>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home coins={coins} />} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/account" element={<Account />} />
