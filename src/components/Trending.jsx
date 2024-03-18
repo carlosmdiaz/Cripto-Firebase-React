@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Trending() {
   const url = "https://api.coingecko.com/api/v3/search/trending";
@@ -24,17 +25,19 @@ function Trending() {
               className="rounded-div flex justify-between p-4 hover:scale-105 ease-in-out duration-300"
             >
               <div className="flex items-center justify-between w-full">
-                <div className="flex">
-                  <img
-                    className="mr-4 rounded-full"
-                    src={coin.item.small}
-                    alt={coin.item.id}
-                  />
-                  <div>
-                    <p className="font-bold">{coin.item.name}</p>
-                    <p>{coin.item.symbol}</p>
+                <Link to={`/coin/${coin.item.id}`}>
+                  <div className="flex">
+                    <img
+                      className="mr-4 rounded-full"
+                      src={coin.item.small}
+                      alt={coin.item.id}
+                    />
+                    <div>
+                      <p className="font-bold">{coin.item.name}</p>
+                      <p>{coin.item.symbol}</p>
+                    </div>
                   </div>
-                </div>
+                </Link>
                 <div className="flex items-center">
                   <img
                     src="https://assets.coingecko.com/coins/images/1/standard/bitcoin.png?1696501400"
