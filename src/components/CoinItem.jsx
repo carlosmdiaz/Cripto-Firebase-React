@@ -1,14 +1,67 @@
-import React from "react";
-import { AiOutlineStar } from "react-icons/ai";
+import React, { useState, useEffect } from "react";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { Sparklines, SparklinesLine } from "react-sparklines";
+import { UserAuth } from "../context/AuthContext";
+import { db } from "../firebase";
+import { arrayUnion, doc, updateDoc, onSnapshot } from "firebase/firestore";
 
 function CoinItem(props) {
   const { coin } = props;
+  const [savedCoin, setSavedCoin] = useState(false);
+  const [coins, setCoins] = useState([]);
+  const { user } = UserAuth();
+
+  const coinPath = doc(db, "users", `${user?.email}`);
+  useEffect(() => {
+    const request = () => {
+      onSnapshot(doc(db, "users", `${user?.email}`), (doc) => {
+        const arr = doc.data().watchList;
+        setCoins(arr);
+        if (arr.find((e) => e.id === coin.id)) {
+          setSavedCoin(true);
+        }
+      });
+    };
+    if (user?.email) {
+      request();
+    }
+  }, []);
+  const deleteCoin = async (passedId) => {
+    try {
+      const result = coins.filter((item) => item.id !== passedId);
+      await updateDoc(coinPath, {
+        watchList: result,
+      });
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+  const saveCoin = async () => {
+    if (user?.email) {
+      if (!savedCoin) {
+        setSavedCoin(true);
+        await updateDoc(coinPath, {
+          watchList: arrayUnion({
+            id: coin.id,
+            name: coin.name,
+            image: coin.image,
+            rank: coin.market_cap_rank,
+            symbol: coin.symbol,
+          }),
+        });
+      } else {
+        setSavedCoin(false);
+        deleteCoin(coin.id);
+      }
+    } else {
+      alert("Please sign in to save a coin to your watch list.");
+    }
+  };
   return (
     <tr className="h-[80px] border-b overflow-hidden">
-      <td>
-        <AiOutlineStar />
+      <td onClick={saveCoin}>
+        {savedCoin ? <AiFillStar /> : <AiOutlineStar />}
       </td>
       <td>{coin.market_cap_rank}</td>
       <td>
